@@ -1,56 +1,8 @@
 <?php
-function usia($tanggal_lahir){
-	$birthDate = new DateTime($tanggal_lahir);
-	$today = new DateTime("today");
-	if ($birthDate > $today) { 
-	    exit("0 tahun 0 bulan 0 hari");
-	}
-	$y = $today->diff($birthDate)->y;
-	$m = $today->diff($birthDate)->m;
-	$d = $today->diff($birthDate)->d;
-	return $y." th ".$m." bl";
-}
-
-#echo usia("1980-12-01");
-
-
-// Seluurh Penduduk
-function penduduk() {
-global $bacapddk, $no;
-?>
-<table class="table table-sm table-bordered table-hover dataTable" role="grid">
-  <thead>
-    <tr>
-      <th scope="col" width="40">#</th>
-      <th scope="col" width="150">N I K</th>
-      <th scope="col">Nama Lengkap</th>
-      <th scope="col" width="">DUSUN</th>
-      <th scope="col" width="5">RT</th>
-      <th scope="col" width="5">RW</th>
-    </tr>
-  </thead>
-<?php
-
-//$bacapddk = $conn->query("select * FROM biodata_wni
-//JOIN data_keluarga ON data_keluarga.no_kk = biodata_wni.no_kk
-//WHERE flag_status='0'
-//;");
-
-while($row = $bacapddk->fetch_assoc()) {
-$nama = strtolower($row["nama_lgkp"]);
-echo 
-"<tr><td>".
-$no++. "</td><td>" . $row["nik"]. "</td><td>" . ucwords($nama)."</td><td>" . $row["alamat"]."</td><td>00" . $row["no_rt"]. "</td><td>00" . $row["no_rw"].
-"</td></tr>";
-}
-echo "</table>";
-} //penduduk
-
 function kepalakk() { ///kepala keluarga
 global $bacakk, $no;
-## KK
 ?>
-<table class="table table-sm">
+<table class="table table-sm table-hover">
   <thead>
     <tr>
       <th scope="col" width="40" class="text-center">#</th>
@@ -66,33 +18,17 @@ while($row = $bacakk->fetch_assoc()) {
 $nama = strtolower($row["nama_lgkp"]);
 echo 
 "<tr><td>".
-$no++. "</td><td>'" . $row["no_kk"]. "</td><td>" . ucwords($nama)."</td><td>00" . $row["no_rt"]. "</td><td>00" . $row["no_rw"].
+$no++. ".</td><td>" . $row["no_kk"]. "</td><td>" . ucwords($nama)."</td><td>00" . $row["no_rt"]. "</td><td>00" . $row["no_rw"].
 "</td></tr>";
 }
 echo "</table>";
 } //Kepala KK
 
-function rtrw($rt,$rw,$jenis) {
-global $conn;
-$rwrt = $conn->query("select nama_lgkp,nik, no_rt, no_rw,jenis_klmin FROM biodata_wni
-JOIN data_keluarga ON data_keluarga.no_kk = biodata_wni.no_kk
-WHERE flag_status='0' AND no_rw='$rw' AND no_rt='$rt' AND jenis_klmin='$jenis' ORDER BY no_rw, no_rt asc
-;");
-return $rwrt;
-}
 
-function bgcolor(){return dechex(rand(0,10000000));}
-// RT RW Dusun
 function dusun() {
-global $no, $conn;
-function bacadusun($rw,$jns){global $conn;
-$bacapddk = mysqli_fetch_array($conn->query("select COUNT(*) FROM biodata_wni JOIN data_keluarga ON data_keluarga.no_kk = biodata_wni.no_kk WHERE flag_status='0' AND data_keluarga.no_rw = $rw AND biodata_wni.jenis_klmin = $jns;"));
-return $bacapddk[0];
-}
+global $no, $conn, $warna;
 
-$bacarw = $conn->query("select no_rw as rw FROM data_keluarga WHERE no_rw GROUP BY rw
-;");
-echo "<div class='card mx-auto text-center mb-3 pb-3 pt-3 bg-primary' style='width:50%'>Daftar Dusun, RT dan RW Desa Termas</div>";
+echo "<div class='card mx-auto text-center mb-3 pb-3 pt-3 bg-success text-white border border-dark' style='width:35%'><h5>Daftar Dusun, RT dan RW Desa Termas</h5></div>";
 
 //// Per Dusun
 echo '<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 pl-3 pb-5 my-0">';
@@ -100,8 +36,8 @@ echo '<div class="col">';
 echo '<div class="card text-center" >';
 echo '<div class="card-header font-weight-bold bg-dark" style="color: #fff"><h3>DUSUN MRAYUN</h3></div>';
 echo '<div class="card-body text-center" >';
-$mrayunlaki = bacadusun('1','1')+bacadusun('2','1');
-$mrayunwadon = bacadusun('1','2')+bacadusun('2','2');
+$mrayunlaki = mysqli_num_rows(data("1","0","1"))+mysqli_num_rows(data("2","0","1"));
+$mrayunwadon = mysqli_num_rows(data("1","0","2"))+mysqli_num_rows(data("2","0","2"));
 echo '
 Laki - Laki : <b>'.$mrayunlaki.'</b><br>
 Perempuan : <b>'.$mrayunwadon.'</b><br>
@@ -115,8 +51,8 @@ echo '<div class="col">';
 echo '<div class="card text-center" >
 <div class="card-header font-weight-bold bg-dark" style="color: #fff"><h3>DUSUN TERMAS</h3></div>
 <div class="card-body text-center" >';
-$termaslaki = bacadusun('3','1');
-$termaswadon = bacadusun('3','2');
+$termaslaki = mysqli_num_rows(data("3","0","1"));
+$termaswadon = mysqli_num_rows(data("3","0","2"));
 echo '
 Laki - Laki : <b>'.$termaslaki.'</b><br>
 Perempuan : <b>'.$termaswadon.'</b><br>
@@ -130,8 +66,8 @@ echo '<div class="col">';
 echo '<div class="card text-center" >
 <div class="card-header font-weight-bold bg-dark" style="color: #fff"><h3>DUSUN GETAS</h3></div>
 <div class="card-body text-center" >';
-$getaslaki = bacadusun('4','1')+bacadusun('5','1');
-$getaswadon = bacadusun('5','2')+bacadusun('4','2');
+$getaslaki = mysqli_num_rows(data("4","0","1"))+mysqli_num_rows(data("5","0","1"));
+$getaswadon = mysqli_num_rows(data("4","0","2"))+mysqli_num_rows(data("5","0","2"));
 echo '
 Laki - Laki : <b>'.$getaslaki.'</b><br>
 Perempuan : <b>'.$getaswadon.'</b><br>
@@ -143,58 +79,57 @@ echo '</div>';
 
 echo '</div>';
 //// Per Dusun END
-
-while($row = $bacarw->fetch_assoc()) {
-$rwe = $row['rw'];
-$bacart = $conn->query("select no_rt as rt FROM data_keluarga WHERE no_rw='$rwe' GROUP BY rt
+$bacarw = $conn->query("select no_rw as rw FROM data_keluarga WHERE no_rw IS NOT NULL GROUP BY rw;");
+// Per RW dan RT
+while($row = mysqli_fetch_array($bacarw)) {
+$rwes = $row['rw'];
+$bacart = $conn->query("select no_rt as rt, no_rw as rw FROM data_keluarga WHERE no_rw='$rwes' AND no_rt IS NOT NULL GROUP BY rt
 ;");
-echo '<div class="row row-cols-1 row-cols-sm-2 row-cols-md-6 pl-3">';
-//echo $no++.'. ';
-echo '
-<div class="col mb-3">
+echo '<div class="row row-cols-1 row-cols-sm-2 row-cols-md-6 pl-3 pb-5 my-0">';
+echo '<div class="col">
 <div class="card text-center" >
-              <div class="card-header font-weight-bold bg-dark" style="color: #fff">
-<h3>RW 00'.$rwe.'</h3>
+              <div class="card-header font-weight-bold '.$warna[array_rand($warna)].'">
+<h4>RW 00'.$rwes.'</h4>
               </div>
               <div class="card-body text-center" >
 <p>
-Jumlah Warga
-</p>
-<h3> '.mysqli_num_rows($conn->query("select nik FROM biodata_wni JOIN data_keluarga ON data_keluarga.no_kk = biodata_wni.no_kk WHERE flag_status='0' AND no_rw='$rwe'")).' </h3>
-              </div>
+Laki-Laki <a href="./index.php?p=data&rw='.$rwes.'&jns=1" class="text-danger">'.mysqli_num_rows(data($rwes,"0","1")).'</a>
+<br>Prempuan <a href="./index.php?p=data&rw='.$rwes.'&jns=2" class="text-danger">'.mysqli_num_rows(data($rwes,"0","2")).'
+</a><br><h3><a href="./index.php?p=data&rw='.$rwes.'" class="text-dark">'.mysqli_num_rows(data($rwes,"0","0")).'</a></h3>
+</p>';
+echo '              </div>
 </div>
 </div>
 ';
-
-while($r = $bacart->fetch_assoc()) {
+// Per RT
+while($r = $bacart->fetch_assoc()) :
 $rt = $r['rt'];
-$rw = $row['rw'];
-$wadon = mysqli_num_rows(rtrw($rt,$rw,'1'));
-$lekong = mysqli_num_rows(rtrw($rt,$rw,2));
+$rw = $rwes;
+$laki = mysqli_num_rows(data($rw,$rt,"1"));
+$wadon = mysqli_num_rows(data($rw,$rt,"2"));
 
 if($rt=="4" & $rw == "2"){
 $dusun = "Dusun Limberejo ?";
-}else{
-$dusun = "";
-}
+}else{$dusun = "";}
 echo '
-<div class="col mb-3">
+<div class="col">
             <div class="card text-center" >
               <div class="card-header font-weight-bold" style="background-color:'.randomColor().';color:'.randomColor().'">
 RT 00'.$rt.' / RW 00'.$rw.' '.$dusun.'
               </div>
               <div class="card-body text-center" >
 <p>
-Laki-Laki '.$lekong.'<br>Prempuan '.$wadon.'
+Laki-Laki <a href="./index.php?p=data&rw='.$rw.'&rt='.$rt.'&jns=1" class="text-dark">'.$laki.'</a><br>Prempuan <a href="./index.php?p=data&rw='.$rw.'&rt='.$rt.'&jns=2" class="text-dark">'.$wadon.'</a>
 </p>
-<h3>'.$lekong+$wadon.'</h3>
+<h3><a href="./index.php?p=data&rw='.$rw.'&rt='.$rt.'" class="text-dark">'.$laki+$wadon.'</a></h3>
               </div>
 </div>
 </div>';
-}
-
+endwhile;
+// per RT END
 echo "</div>";
 }
+// Per RW dan RT END
 
 
 }
@@ -337,7 +272,7 @@ COUNT(IF(umur BETWEEN 4 and 5,1,NULL)) AS '4 - 5',
 COUNT(IF(umur BETWEEN 5 and 12,1,NULL)) AS '4 - 12',
 COUNT(IF(umur BETWEEN 12 and 18,1,NULL)) AS '12 - 18',
 COUNT(IF(umur BETWEEN 18 and 64,1,NULL)) AS '18 - 64',
-COUNT(IF(umur >= 65,1,NULL)) AS '65 ke-atas'
+COUNT(IF(umur >= 65,1,NULL)) AS '65 ke-atas', count(*) as jujum
 FROM (select nik, tgl_lhr, TIMESTAMPDIFF(YEAR, tgl_lhr,
 CURDATE()) AS umur FROM biodata_wni WHERE flag_status='0') as dummy_table
 ";
@@ -355,14 +290,23 @@ echo '<table class="table table-sm table-hover">
 $nos = "1";
 foreach($re as $key => $value){
 if($no % 2 == 0){
+if ($key == 'jujum')
+{
+echo '<tr class="table-dark">';
+echo "<td colspan=\"2\" class=\"text-end\">Total
+</td><td class=\"text-center\"><b>" . $re['jujum'].
+"</b></td>";
+echo '</tr>';
+}else{
 echo 
 "<tr><td>". $nos++.
 ".</td><td class=\"text-center\">" . $key.
 "</td><td class=\"text-center\">" . $value.
 "</td></tr>";
-}
+}}
 $no++;
 }
+
 echo "</table>";
 echo '</div>';
 echo '<div class="col">';
@@ -374,22 +318,24 @@ echo '<table class="table table-sm table-hover">
       <th scope="col" width="" class="text-center">Jumlah Jiwa</th>
     </tr>
   </thead>';
-$pekerjaan = $conn->query('SELECT no, descrip FROM pkrjn_master');
-while($row = mysqli_fetch_assoc($pekerjaan)){
-//    print_r($row);
- }
+
 $nop = "1";
-foreach($conn->query('SELECT jenis_klmin,COUNT(*)
+foreach($conn->query('SELECT jenis_klmin,COUNT(*) as jum
 FROM biodata_wni
 WHERE biodata_wni.flag_status="0"
 GROUP BY jenis_klmin ORDER BY COUNT(*) desc') as $row) {
-
 echo "<tr>";
 echo "<td>" . $nop++ . ".</td>";
 echo "<td>" . $jeniskelamin[$row['jenis_klmin']] . "</td>";
-echo "<td class=\"text-center\">" . $row['COUNT(*)'] . "</td>";
-echo "</tr>"; 
+echo "<td class=\"text-center\">" . $row['jum'] . "</td>";
+echo "</tr>";
 }
+$jujum = mysqli_fetch_array($conn->query('SELECT COUNT(*) as jum FROM biodata_wni WHERE flag_status="0";'));
+echo '<tr class="table-dark">';
+echo "<td colspan=\"2\" class=\"text-end\">Total
+</td><td class=\"text-center\"><b>" . $jujum['jum'].
+"</b></td>";
+echo '</tr>';
 echo "</table>";
 echo '<table class="table table-sm table-hover table-responsive-sm">
   <thead style="background:green">
@@ -413,6 +359,11 @@ echo "<td>" . ucwords($agama) . "</td>";
 echo "<td class=\"text-center\">" . $row['COUNT(*)'] . "</td>";
 echo "</tr>"; 
 }
+echo '<tr class="table-dark">';
+echo "<td colspan=\"2\" class=\"text-end\">Total
+</td><td class=\"text-center\"><b>" . $jujum['jum'].
+"</b></td>";
+echo '</tr>';
 echo "</table>";
 echo '</div>';
 
@@ -445,6 +396,11 @@ echo "<td>" . ucwords($kerja) . "</td>";
 echo "<td class=\"text-center\">" . $row['COUNT(*)'] . "</td>";
 echo "</tr>"; 
 }
+echo '<tr class="table-dark">';
+echo "<td colspan=\"2\" class=\"text-end\">Total
+</td><td class=\"text-center\"><b>" . $jujum['jum'].
+"</b></td>";
+echo '</tr>';
 echo "</table>";
 echo '</div>';
 echo '<div class="col">';
@@ -471,6 +427,11 @@ echo "<td>" . $pendidikan . "</td>";
 echo "<td class=\"text-center\">" . $row['COUNT(*)'] . "</td>";
 echo "</tr>"; 
 }
+echo '<tr class="table-dark">';
+echo "<td colspan=\"2\" class=\"text-end\">Total
+</td><td class=\"text-center\"><b>" . $jujum['jum'].
+"</b></td>";
+echo '</tr>';
 echo "</table>";
 
 echo '<table class="table table-sm table-hover">
@@ -499,6 +460,11 @@ echo "<td>" . ucwords($kawin) . "</td>";
 echo "<td class=\"text-center\">" . $row['COUNT(*)'] . "</td>";
 echo "</tr>"; 
 }
+echo '<tr class="table-dark">';
+echo "<td colspan=\"2\" class=\"text-end\">Total
+</td><td class=\"text-center\"><b>" . $jujum['jum'].
+"</b></td>";
+echo '</tr>';
 echo "</table>";
 echo '<table class="table table-sm table-hover">
   <thead class="bg-primary">
@@ -526,6 +492,11 @@ echo "<td>" . ucwords($kawin) . "</td>";
 echo "<td class=\"text-center\">" . $row['COUNT(*)'] . "</td>";
 echo "</tr>"; 
 }
+echo '<tr class="table-dark">';
+echo "<td colspan=\"2\" class=\"text-end\">Total
+</td><td class=\"text-center\"><b>" . $jujum['jum'].
+"</b></td>";
+echo '</tr>';
 echo "</table>";
 echo '</div>';
 
@@ -536,66 +507,95 @@ echo '</div>'; //rowwwwwww
 
 function perangkat() {
 global $perangkat, $no;
-?>
-<table class="table table-sm table-striped table-hover">
-<?php
+
+echo '<table class="table table-sm table-striped table-hover">';
 
 while($row = $perangkat->fetch_assoc()) {
 $nama = strtolower($row["nama_lgkp"]);
+$nokks = base64_encode($row['no_kk']);
 echo 
 "<tr>
-<td>".$no++. ".</td><td>" . $row["nik"]. "</td>
-<td><a class='text-dark' href='./index.php?p=pkk&no=".base64_encode($row['no_kk'])."'>" . uckata($nama)."</a></td>
+<td>".$no++. ".</td>
+<td>" . $row["nik"]. "</td>
+<td><a class='text-dark' href='./index.php?p=pkk&nos=".base64_encode($row['no_kk'])."'>" . uckata($nama)."</a></td>
 <td>".uckata($row['tmpt_lhr']).", " .bulan($row['tgl_lhr'])."</td>
-<td>" . hitung_umur($row['tgl_lhr'])."</td>
+<td>" . usia($row['tgl_lhr'])."</td>
 <td>" . uckata($row["alamat"])." RT 00" . $row["no_rt"]. " RW 00" . $row["no_rw"]."</td>
 </tr>";
 }
 echo "</table>";
+
 } //penduduk
 
 
-function wargarw(){global $conn;
-if (!empty($_GET['$rw'])){
+function warga(){
+global $jeniskelamin, $ident, $no;
+if (!empty($_GET['rw'])){
 $rw = trim($_GET['rw']);
-$erwe = "AND biodata_wni.jenis_klmin = $rw";
+$erwe = " RW 00".$rw;
 }
-if (empty($_GET['$rw'])){
+if (empty($_GET['rw'])){
+$rw = "0";
 $erwe = "";
 }
 if (!empty($_GET['jns'])){
 $jns = $_GET['jns'];
-$jnis = "AND biodata_wni.jenis_klmin = $jns";
-}else{
-$jns = "";
+$jnis = "<br>Jenis Kelamin ".$jeniskelamin[$jns];
+}
+if (empty($_GET['jns'])){
+$jns = "0";
 $jnis = "";
 }
-echo $erwe." - ".$jns;
-$wargarw = $conn->query("select * FROM biodata_wni
-JOIN data_keluarga ON data_keluarga.no_kk = biodata_wni.no_kk
-WHERE flag_status='0' $erwe $jnis;");
-$jumlahpddk = mysqli_num_rows($wargarw);
-echo "<br>";
-echo $jumlahpddk;
-echo "<br>";
-while($row = mysqli_fetch_array($wargarw)) :
-echo $row['nama_lgkp']." RT 00".$row['no_rt'];
-echo "<br>";
-endwhile;
+if (!empty($_GET['rt'])){
+$rt = trim($_GET['rt']);
+$erte = " RT 00".$rt;
+}
+if (empty($_GET['rt'])){
+$rt = "0";
+$erte = "";
+}
+
+$jumlahpddk = mysqli_num_rows(data($rw,$rt,$jns));
+
+echo '<div class="mx-auto text-center text-dark border border-dark my-2 mb-4 py-1 p-2 border-2" style="width:50%">
+<h5><b>Data Warga Desa '.uckata($ident['nama_kel']).$erte.$erwe.$jnis.'</b></h5>Jumlah Warga '.$jumlahpddk.' </div>';
+echo '<table class="table table-sm table-hover">';
+foreach(data($rw,$rt,$jns) as $row) :
+$nama = $row["nama_lgkp"];
+$nokks = base64_encode($row['no_kk']);
+$dsna = array("Dusn ", "DUSUN ", "Dsn ");
+$alamat = $row["alamat"];
+$alamat = str_replace($dsna, "", $alamat);
+echo 
+"<tr>
+<td>".$no++. ".</td>
+<td>" . $row["nik"]. "</td>
+<td><a class='text-dark' href='./index.php?p=pkk&nos=".base64_encode($row['no_kk'])."'>" . uckata($nama)."</a></td>
+<td>".uckata($row['tmpt_lhr']).", " .bulan($row['tgl_lhr'])."</td>
+<td>" . usia($row['tgl_lhr'])."</td>
+<td>" . uckata($alamat)." RT 00" . $row["no_rt"]. " RW 00" . $row["no_rw"]."</td>
+</tr>";
+
+endforeach;
+echo "</table>";
+
 }
 
 function perkk() {
 global $conn, $no, $jeniskel, $status;
-if (!empty($_GET['no'])) {
-$nokk = base64_decode($_GET['no']);
+if (!empty($_GET['nos'])) {
+$nokk = base64_decode($_GET['nos']);
 
 $datakk = "SELECT *,timestampdiff(year, tgl_lhr, curdate()) as umur FROM biodata_wni
 JOIN shdk ON shdk.no = biodata_wni.stat_hbkel
 WHERE biodata_wni.no_kk LIKE '%$nokk%' ORDER BY biodata_wni.stat_hbkel ASC,biodata_wni.tgl_lhr ASC
 ;";
 $datakk = $conn->query($datakk);
+echo '
+<span class="float-end bi bi-printer w-2 p-2 text-success"></span>
 
-echo '<div class="mx-auto text-center text-dark border border-dark my-3 py-2 pt-3 border-2" style="width:40%"><h5><b>'.$nokk.'</b></h5></div>
+<div class="mx-auto text-center text-dark border border-dark my-2 py-1 pt-2 border-2" style="width:40%"><h5><b>'.$nokk.'</b></h5></div>
+
 <table class="table table-sm table-striped">
 <thead>
 <tr>
@@ -631,7 +631,7 @@ echo '<tr>
 <td> '.date("d/m/Y",strtotime($r['tgl_lhr'])).' </td>
 <td align="center">'.$r['umur'].' </td>
 <td>'.uckata(pekerjaan($r['jenis_pkrjn'])).' </td>
-<td>'.pendidikan($r['pddk_akh']).' </td>
+<td>'.sekolah($r['pddk_akh']).' </td>
 <td>'.$status[$r['stat_kwn']].' </td>
 <td>'.uckata($descrip).' </td>
 <td>'.uckata($ayah).' </td>
@@ -641,8 +641,6 @@ echo '<tr>
 endwhile;
 echo '</tbody></table>
 ';
-}else{
-echo "Data Gak Ada";
 }
 } //function perkk
 ?>

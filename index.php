@@ -55,9 +55,9 @@ include "klas.php";
 echo perangkat();
 break;
 
-case 'rw':
+case 'data':
 include "klas.php";
-echo wargarw();
+echo warga();
 break;
 
 case 'pkk':
