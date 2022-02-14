@@ -45,15 +45,10 @@ $data = "SELECT * FROM biodata_wni
 JOIN data_keluarga ON data_keluarga.no_kk = biodata_wni.no_kk
 WHERE biodata_wni.$kolomCari LIKE '%$q%'
 ;";
-//LIMIT $hal_awal, $batas
 $data = $conn->query($data);
-    
-$no = 1;
-
-//    while($d = mysqli_fetch_array($data_pegawai)){
 echo '<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">';
 while($row = mysqli_fetch_array($data)){
-if ($no % 2 == 0){ //Kondisi
+if ($no % 2 == 0){
     $warn = "table-light";
 }else {
     $warn = "";
@@ -72,7 +67,7 @@ $ayah = $row['nama_lgkp_ayah'];}else{$ayah="";}
 echo "<td width='60'>NIK </td><td>:</td><td><a data-bs-toggle='modal' href='#Y2".strtoupper($nokkhash)."' class='text-dark'>". $row['nik'],
 "</a></td></tr><tr><td>Nama </td><td>:</td><td>". uckata($row["nama_lgkp"]) ,
 "</td></tr><tr><td>Lahir </td><td>:</td><td>". uckata($row['tmpt_lhr']). ", ".$tl.
-"</td></tr><tr><td>Usia </td><td>:</td><td class='d-flex'>". hitung_umur($row['tgl_lhr']) ,
+"</td></tr><tr><td>Usia </td><td>:</td><td class='d-flex'>". usia($row['tgl_lhr']) ,
 "</td></tr><tr><td>Status </td><td>:</td><td><span class='float-left'>". $status[$row['stat_kwn']],
 "</span><span class='float-right' style='float:right;'>".$row["flag_status"]."</span></td></tr><tr><td>Alamat </td><td>:</td><td>". uckata($row['alamat']). " 00".$row['no_rt']. " / 00" .$row['no_rw'],
 "</td>"
@@ -88,7 +83,7 @@ echo '
     <div class="modal-content">
       <!-- Modal body -->
       <div class="modal-body"><button type="button" class="btn btn-danger float-end" data-bs-dismiss="modal">Tutup</button>
-      <div class="mx-auto text-center font-weight-bold border border-dark my-2 py-2 border-2" style="width:50%">'.$nokk.'</div>
+      <div class="mx-auto text-center font-weight-bold border border-dark my-2 py-1 pt-2 border-2" style="width:50%"><h5><b>'.$nokk.'</h5></b></div>
 <table class="table table-sm table-striped">
 <thead>
 <tr>
