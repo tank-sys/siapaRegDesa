@@ -9,19 +9,19 @@ include("./head.php");
 if(isset($_GET['p'])){
 $page = $_GET['p'];
 $no = 1;
-		switch ($page) {
+
+switch ($page) {
+
+
 case 'kk':
-include "klas.php";
 echo kepalakk();
 break;
 
 case 'angka':
-include "klas.php";
 echo angka();
 break;			
 
 case 'dusun':
-include "klas.php";
 echo dusun();
 break;			
 
@@ -36,27 +36,22 @@ echo pdf();
 break;			
 
 case 'balita':
-include "klas.php";
 echo ba4ta();
 break;
 
 case 'lansia':
-include "klas.php";
 echo lansia();
 break;
 
 case 'perangkat':
-include "klas.php";
 echo perangkat();
 break;
 
 case 'data':
-include "klas.php";
 echo warga();
 break;
 
 case 'pkk':
-include "klas.php";
 echo perkk();
 break;			
 

@@ -1,5 +1,5 @@
 <?php
-include("./func.php");
+include("./klas.php");
 ?>
 <!doctype html>
 <html lang="en" class="h-100">
