@@ -10,11 +10,6 @@ if(isset($_GET['p'])){
 $page = $_GET['p'];
 $no = 1;
 		switch ($page) {
-case 'penduduk':
-include "klas.php";
-echo penduduk();
-break;
-
 case 'kk':
 include "klas.php";
 echo kepalakk();
