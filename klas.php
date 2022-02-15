@@ -1,7 +1,7 @@
 <?php
-$servername = "localhost:6969";
-$username = "ta";
-$password = "tank";
+$servername = "localhost";
+$username = "root";
+$password = "";
 $dbname = "smard";
 $conn = new MySQLi($servername, $username, $password, $dbname);
 if ($conn->connect_error) {die("Connection failed: Error nda..." . $conn->connect_error);} 
