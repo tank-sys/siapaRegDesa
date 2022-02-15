@@ -18,7 +18,7 @@ while($row = $bacakk->fetch_assoc()) {
 $nama = strtolower($row["nama_lgkp"]);
 echo 
 "<tr><td>".
-$no++. ".</td><td>" . $row["no_kk"]. "</td><td>" . ucwords($nama)."</td><td>00" . $row["no_rt"]. "</td><td>00" . $row["no_rw"].
+$no++. ".</td><td><a class='text-dark' href='./index.php?p=pkk&nos=".base64_encode($row['no_kk'])."'>" . $row["no_kk"]. "</a></td><td>" . ucwords($nama)."</td><td>00" . $row["no_rt"]. "</td><td>00" . $row["no_rw"].
 "</td></tr>";
 }
 echo "</table>";
@@ -41,7 +41,7 @@ $mrayunwadon = mysqli_num_rows(data("1","0","2"))+mysqli_num_rows(data("2","0","
 echo '
 Laki - Laki : <b>'.$mrayunlaki.'</b><br>
 Perempuan : <b>'.$mrayunwadon.'</b><br>
-Jumlah Penduduk<br><h3>'.$mrayunwadon+$mrayunlaki.'</h3>
+Jumlah Penduduk<br><h3><a href="index.php?p=data&rw=1&rw2=2" class="text-dark">'.$mrayunwadon+$mrayunlaki.'</a></h3>
 ';
 echo '</div>';
 echo '</div>';
@@ -56,7 +56,7 @@ $termaswadon = mysqli_num_rows(data("3","0","2"));
 echo '
 Laki - Laki : <b>'.$termaslaki.'</b><br>
 Perempuan : <b>'.$termaswadon.'</b><br>
-Jumlah Penduduk<br><h3>'.$termaslaki+$termaswadon.'</h3>
+Jumlah Penduduk<br><h3><a href="index.php?p=data&rw=3" class="text-dark">'.$termaslaki+$termaswadon.'</a></h3>
 ';
 echo '</div>';
 echo '</div>';
@@ -71,7 +71,7 @@ $getaswadon = mysqli_num_rows(data("4","0","2"))+mysqli_num_rows(data("5","0","2
 echo '
 Laki - Laki : <b>'.$getaslaki.'</b><br>
 Perempuan : <b>'.$getaswadon.'</b><br>
-Jumlah Penduduk<h3>'.$getaslaki+$getaswadon.'</h3>
+Jumlah Penduduk<h3><a href="index.php?p=data&rw=4&rw2=5" class="text-dark">'.$getaslaki+$getaswadon.'</a></h3>
 ';
 echo '</div>';
 echo '</div>';
@@ -530,39 +530,37 @@ echo "</table>";
 
 function warga(){
 global $jeniskelamin, $ident, $no;
-if (!empty($_GET['rw'])){
-$rw = trim($_GET['rw']);
-$erwe = " RW 00".$rw;
-}
-if (empty($_GET['rw'])){
+if (!empty($_GET['rt'])){ $rt = trim($_GET['rt']); $erte = " RT 00".$rt; }
+if (empty($_GET['rt'])){ $rt = "0"; $erte = ""; }
+if (!empty($_GET['jns'])){ $jns = $_GET['jns']; $jnis = $jeniskelamin[$jns]; }
+if (empty($_GET['jns'])){ $jns = "0"; $jnis = ""; }
+if (empty($_GET['rw2'])){$erwe2 = ""; $jumlahpddk2 ="0";}
+if (empty($_GET['rw']) && empty($_GET['jns']) && empty($_GET['rt'])){
 $rw = "0";
 $erwe = "";
+$jumlahpddk = mysqli_num_rows(data($rw,$rt,$jns));
+$data = data($rw,$rt,$jns);
 }
-if (!empty($_GET['jns'])){
-$jns = $_GET['jns'];
-$jnis = "<br>Jenis Kelamin ".$jeniskelamin[$jns];
-}
-if (empty($_GET['jns'])){
-$jns = "0";
-$jnis = "";
-}
-if (!empty($_GET['rt'])){
-$rt = trim($_GET['rt']);
-$erte = " RT 00".$rt;
-}
-if (empty($_GET['rt'])){
-$rt = "0";
-$erte = "";
+if (!empty($_GET['rw'])){
+$rw = trim($_GET['rw']); $erwe = " RW 00".$rw;
+$jumlahpddk = mysqli_num_rows(data($rw,$rt,$jns));
+$data = data($rw,$rt,$jns);
 }
 
-$jumlahpddk = mysqli_num_rows(data($rw,$rt,$jns));
+if (!empty($_GET['rw2'])){
+$rw2 = trim($_GET['rw2']); $erwe2 = " RW 00".$rw2;
+$jumlahpddk2 = mysqli_num_rows(data($rw2,$rt,$jns));
+$data2 = data($rw,$rt,$jns);
+}
+if (($rw == "1") || ($rw == "2")  || ($rw2 == "1")  || ($rw2 == "2")) {$nadus = "Dusun Mrayun";}
+if (($rw == "3") || ($rw2 == "3")) {$nadus = "Dusun Termas";}
+if (($rw == "4") || ($rw == "5") || ($rw2 == "4") || ($rw2 == "5")) {$nadus = "Dusun Getas";}
 
 echo '<div class="mx-auto text-center text-dark border border-dark my-2 mb-4 py-1 p-2 border-2" style="width:50%">
-<h5><b>Data Warga Desa '.uckata($ident['nama_kel']).$erte.$erwe.$jnis.'</b></h5>Jumlah Warga '.$jumlahpddk.' </div>';
+<h5><b>Data Warga <br> Desa '.uckata($ident['nama_kel']).' '.$nadus.$erte.$erwe.$erwe2.'</h5>Jenis Kelamin '.$jnis.'</b><br>Jumlah Warga '.$jumlahpddk+$jumlahpddk2.' </div>';
 echo '<table class="table table-sm table-hover">';
-foreach(data($rw,$rt,$jns) as $row) :
+foreach($data as $row) :
 $nama = $row["nama_lgkp"];
-$nokks = base64_encode($row['no_kk']);
 $dsna = array("Dusn ", "DUSUN ", "Dsn ");
 $alamat = $row["alamat"];
 $alamat = str_replace($dsna, "", $alamat);
@@ -575,8 +573,27 @@ echo
 <td>" . usia($row['tgl_lhr'])."</td>
 <td>" . uckata($alamat)." RT 00" . $row["no_rt"]. " RW 00" . $row["no_rw"]."</td>
 </tr>";
-
 endforeach;
+
+if (!empty($_GET['rw2'])){
+$rw2 = trim($_GET['rw2']);
+$data2 = data($rw2,$rt,$jns);
+foreach($data2 as $row) :
+$nama = $row["nama_lgkp"];
+$dsna = array("Dusn ", "DUSUN ", "Dsn ");
+$alamat = $row["alamat"];
+$alamat = str_replace($dsna, "", $alamat);
+echo 
+"<tr>
+<td>".$no++. ".</td>
+<td>" . $row["nik"]. "</td>
+<td><a class='text-dark' href='./index.php?p=pkk&nos=".base64_encode($row['no_kk'])."'>" . uckata($nama)."</a></td>
+<td>".uckata($row['tmpt_lhr']).", " .bulan($row['tgl_lhr'])."</td>
+<td>" . usia($row['tgl_lhr'])."</td>
+<td>" . uckata($alamat)." RT 00" . $row["no_rt"]. " RW 00" . $row["no_rw"]."</td>
+</tr>";
+endforeach;
+}
 echo "</table>";
 
 }
