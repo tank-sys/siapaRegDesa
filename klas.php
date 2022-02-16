@@ -1,28 +1,28 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
+///koneksi
+$servername = "localhost:6969";
+$username = "ta";
+$password = "tank";
 $dbname = "smard";
 $conn = new MySQLi($servername, $username, $password, $dbname);
 if ($conn->connect_error) {die("Connection failed: Error nda..." . $conn->connect_error);} 
 
 $join = "SELECT * FROM data_keluarga JOIN biodata_wni ON biodata_wni.no_kk = data_keluarga.no_kk WHERE biodata_wni.stat_hbkel='1' AND biodata_wni.flag_status='0' ORDER BY data_keluarga.no_rw ASC";
-
-$ident = $conn->query("select nama_kel,nama_kec,nama_kab,last_kons FROM instansi;");
-$perangkat = $conn->query("select * FROM biodata_wni JOIN pkrjn_master ON biodata_wni.jenis_pkrjn = pkrjn_master.no JOIN data_keluarga ON data_keluarga.no_kk = biodata_wni.no_kk WHERE biodata_wni.jenis_pkrjn = '85' ORDER BY biodata_wni.tgl_lhr ASC;");
-$jumperangkat = mysqli_num_rows($perangkat);
-
 $bacakk  = $conn->query($join);
 $jumlahKK = mysqli_num_rows($bacakk);
-$ident = mysqli_fetch_array($ident);
+$ident = mysqli_fetch_array($conn->query("SELECT nama_kel,nama_kec,nama_kab,last_kons FROM instansi;"));
+$perangkat = $conn->query("SELECT * FROM biodata_wni JOIN pkrjn_master ON biodata_wni.jenis_pkrjn = pkrjn_master.no JOIN data_keluarga ON data_keluarga.no_kk = biodata_wni.no_kk WHERE biodata_wni.jenis_pkrjn = '85' ORDER BY biodata_wni.tgl_lhr ASC;");
+$jumperangkat = mysqli_num_rows($perangkat);
 
+/// array umum
 $no = 1;
 $hari = array (0 =>  'Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'); //gunakan date('w', strtotime($tanggal);
-$status = array (1 =>  'Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati');
 $jeniskelamin = array (1 =>  'Laki-Laki', 'Perempuan');
 $jeniskel = array (1 =>  'L', 'P');
 $dusunku = array (1 =>  'Mrayun', 'Termas', 'Getas');
+$warna = array ('text-white bg-primary', 'text-white bg-secondary', 'text-white bg-success', 'text-white bg-danger', 'text-white bg-dark', 'text-dark bg-info','text-dark bg-light','text-white bg-dark'); 
 
+/// function umum
 function uckata($kata) {return ucwords(strtolower($kata));}
 function bulan($tanggal){
  $bulan = array (1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember');
@@ -33,11 +33,20 @@ function pekerjaan($no) {global $conn;
 $jenispekerjaan = mysqli_fetch_row($conn->query("select * FROM pkrjn_master WHERE no='$no'"));
 if ($jenispekerjaan[0] == "2"){$jenispekerjaan[1] = 'Ibu Rumah T';}
 if ($jenispekerjaan[0] == "1"){$jenispekerjaan[1] = 'Belum Bekerja';}
-return $jenispekerjaan[1];
+return uckata($jenispekerjaan[1]);
+}
+function agama($no) {global $conn;
+$agama = mysqli_fetch_row($conn->query("SELECT * FROM agama_master WHERE no='$no'"));
+return uckata($agama[1]);
+}
+
+function status($no) {global $conn;
+$status = mysqli_fetch_row($conn->query("SELECT * FROM kwn_master WHERE no='$no'"));
+return uckata($status[1]);
 }
 
 function sekolah($no) {global $conn;
-$pendidikan = mysqli_fetch_row($conn->query("select * FROM pddkn_master WHERE no='$no'"));
+$pendidikan = mysqli_fetch_row($conn->query("SELECT * FROM pddkn_master WHERE no='$no'"));
 return $pendidikan[1];
 }
 
@@ -50,8 +59,6 @@ $m = $today->diff($birthDate)->m;
 $d = $today->diff($birthDate)->d;
 return $y." tahun ".$m." bulan ".$d." hari";
 }
-
-$warna = array ('text-white bg-primary', 'text-white bg-secondary', 'text-white bg-success', 'text-white bg-danger', 'text-white bg-dark', 'text-dark bg-info','text-dark bg-light','text-white bg-dark'); 
 function warna(){
 global $warna;
 for($i=0;$i<6;$i++){ $warno = array_rand($warna); $warne = $warna[$warno]; }
@@ -91,6 +98,8 @@ ORDER BY data_keluarga.no_rw ASC, data_keluarga.no_rt ASC
 //echo '<small>RW '.$rw. ' - RT ' .$rt. ' - Jenis ' .$jenis.'</small><br>';
 return $rwrt;
 }
+
+// function khusus
 function kepalakk() { ///kepala keluarga
 global $bacakk, $no;
 ?>
@@ -382,11 +391,11 @@ echo '<table class="table table-sm table-hover">
 $nos = "1";
 foreach($re as $key => $value){
 if($no % 2 == 0){
-if ($key == 'jujum')
+if ($key == 'ren')
 {
 echo '<tr class="table-dark">';
 echo "<td colspan=\"2\" class=\"text-end\">Total
-</td><td class=\"text-center\"><b>" . $re['jujum'].
+</td><td class=\"text-center\"><b>" . $re['ren'].
 "</b></td>";
 echo '</tr>';
 }else{
@@ -626,12 +635,13 @@ if (!empty($_GET['rt'])){ $rt = trim($_GET['rt']); $erte = " RT 00".$rt; }
 if (empty($_GET['rt'])){ $rt = "0"; $erte = ""; }
 if (!empty($_GET['jns'])){ $jns = $_GET['jns']; $jnis = $jeniskelamin[$jns]; }
 if (empty($_GET['jns'])){ $jns = "0"; $jnis = ""; }
-if (empty($_GET['rw2'])){$erwe2 = ""; $jumlahpddk2 ="0";}
+if (empty($_GET['rw2'])){$erwe2 = ""; $jumlahpddk2 ="0";$rw2="";}
 if (empty($_GET['rw']) && empty($_GET['jns']) && empty($_GET['rt'])){
 $rw = "0";
 $erwe = "";
 $jumlahpddk = mysqli_num_rows(data($rw,$rt,$jns));
 $data = data($rw,$rt,$jns);
+$nadus = "";
 }
 if (!empty($_GET['rw'])){
 $rw = trim($_GET['rw']); $erwe = " RW 00".$rw;
@@ -691,7 +701,7 @@ echo "</table>";
 }
 
 function perkk() {
-global $conn, $no, $jeniskel, $status;
+global $conn, $no, $jeniskel;
 if (!empty($_GET['nos'])) {
 $nokk = base64_decode($_GET['nos']);
 
@@ -739,9 +749,9 @@ echo '<tr>
 <td align="center">'.$jeniskel[$r['jenis_klmin']].' </td>
 <td> '.date("d/m/Y",strtotime($r['tgl_lhr'])).' </td>
 <td align="center">'.$r['umur'].' </td>
-<td>'.uckata(pekerjaan($r['jenis_pkrjn'])).' </td>
+<td>'.pekerjaan($r['jenis_pkrjn']).' </td>
 <td>'.sekolah($r['pddk_akh']).' </td>
-<td>'.$status[$r['stat_kwn']].' </td>
+<td>'.status($r['stat_kwn']).' </td>
 <td>'.uckata($descrip).' </td>
 <td>'.uckata($ayah).' </td>
 <td>'.uckata($ibu).' </td>
