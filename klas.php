@@ -1,4 +1,7 @@
 <?php
+defined('web') or die ("Gak intuk akses langsung");
+
+
 ///koneksi
 $servername = "localhost:6969";
 $username = "ta";
@@ -9,10 +12,9 @@ if ($conn->connect_error) {die("Connection failed: Error nda..." . $conn->connec
 
 $join = "SELECT * FROM data_keluarga JOIN biodata_wni ON biodata_wni.no_kk = data_keluarga.no_kk WHERE biodata_wni.stat_hbkel='1' AND biodata_wni.flag_status='0' ORDER BY data_keluarga.no_rw ASC";
 $bacakk  = $conn->query($join);
-$jumlahKK = mysqli_num_rows($bacakk);
-$ident = mysqli_fetch_array($conn->query("SELECT nama_kel,nama_kec,nama_kab,last_kons FROM instansi;"));
-$perangkat = $conn->query("SELECT * FROM biodata_wni JOIN pkrjn_master ON biodata_wni.jenis_pkrjn = pkrjn_master.no JOIN data_keluarga ON data_keluarga.no_kk = biodata_wni.no_kk WHERE biodata_wni.jenis_pkrjn = '85' ORDER BY biodata_wni.tgl_lhr ASC;");
-$jumperangkat = mysqli_num_rows($perangkat);
+$jumlahKK = $conn->query($join)->num_rows;
+$ident = $conn->query("SELECT nama_kel,nama_kec,nama_kab,last_kons FROM instansi;")->fetch_array();
+$jumperangkat = $conn->query("SELECT * FROM biodata_wni JOIN pkrjn_master ON biodata_wni.jenis_pkrjn = pkrjn_master.no JOIN data_keluarga ON data_keluarga.no_kk = biodata_wni.no_kk WHERE biodata_wni.jenis_pkrjn = '85' ORDER BY biodata_wni.tgl_lhr ASC;")->num_rows;
 
 /// array umum
 $no = 1;
@@ -21,35 +23,82 @@ $jeniskelamin = array (1 =>  'Laki-Laki', 'Perempuan');
 $jeniskel = array (1 =>  'L', 'P');
 $dusunku = array (1 =>  'Mrayun', 'Termas', 'Getas');
 $warna = array ('text-white bg-primary', 'text-white bg-secondary', 'text-white bg-success', 'text-white bg-danger', 'text-white bg-dark', 'text-dark bg-info','text-dark bg-light','text-white bg-dark'); 
+$dusun = array('Dusun Mrayun' => array('1', '2'), 'Dusun Termas' => array('3'), 'Dusun Getas' => array('4', '5'));
+$akerja = array('1' => "-",
+'2' => "MENGURUS Rumah",
+'3' => "PELAJAR / Mahasiswa",
+'4' => "PENSIUNAN",
+'5' => "A S N",
+'6' => "T N I",
+'7' => "Kepolisian R I",
+'9' => "PETANI / PEKEBUN",
+'11' => "NELAYAN / PERIKANAN",
+'15' => "KARYAWAN SWASTA",
+'16' => "KARYAWAN BUMN",
+'17' => "KARYAWAN BUMD",
+'18' => "KARYAWAN HONORER",
+'19' => "BURUH HARIAN",
+'20' => "BURUH TANI",
+'21' => "BURUH NELAYAN",
+'22' => "BURUH PETERNAKAN",
+'23' => "P R T",
+'29' => "TUKANG LAS",
+'39' => "PERANCANG BUSANA",
+'41' => "IMAM MESJID",
+'45' => "USTADZ / MUBALIGH",
+'46' => "JURU MASAK",
+'48' => "ANGGOTA Dewan",
+'49' => "ANGGOTA D P D",
+'50' => "ANGGOTA B P K",
+'85' => "PERANGKAT DESA",
+'86' => "KEPALA DESA"
+);
 
 /// function umum
 function uckata($kata) {return ucwords(strtolower($kata));}
 function bulan($tanggal){
- $bulan = array (1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember');
- $split = explode('-', $tanggal);
- return $split[2] . ' ' . $bulan[ (int)$split[1] ] . ' ' . $split[0];
+$bulan = array (1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember');
+$split = explode('-', $tanggal);
+return $split[2] . ' ' . $bulan[ (int)$split[1] ] . ' ' . $split[0];
 }
-function pekerjaan($no) {global $conn;
-$jenispekerjaan = mysqli_fetch_row($conn->query("select * FROM pkrjn_master WHERE no='$no'"));
-if ($jenispekerjaan[0] == "2"){$jenispekerjaan[1] = 'Ibu Rumah T';}
-if ($jenispekerjaan[0] == "1"){$jenispekerjaan[1] = 'Belum Bekerja';}
-return uckata($jenispekerjaan[1]);
+function pekerjaan($no) {global $conn, $akerja;
+$kerja = $conn->query("select * FROM pkrjn_master WHERE no='$no'")->fetch_row();
+//if (isset($jenispekerjaan[0]) && ($jenispekerjaan[0] == $akerja[0])){}
+if (isset($kerja[1])){
+foreach ($akerja as $key => $val){if ($kerja[0] == $key) {$kerja[1] = $val;}}
+return uckata($kerja[1]);
+}else{return ("Gak Jelas");}
 }
 function agama($no) {global $conn;
-$agama = mysqli_fetch_row($conn->query("SELECT * FROM agama_master WHERE no='$no'"));
+$agama = $conn->query("SELECT * FROM agama_master WHERE no='$no'")->fetch_row();
+if (isset($agama[1])){
 return uckata($agama[1]);
-}
+}else{return ("Lain-lain");}}
 
 function status($no) {global $conn;
-$status = mysqli_fetch_row($conn->query("SELECT * FROM kwn_master WHERE no='$no'"));
+$status = $conn->query("SELECT * FROM kwn_master WHERE no='$no'")->fetch_row();
+if (isset($status[1])){
 return uckata($status[1]);
-}
+}else{return ("Gak Jelas");}}
 
 function sekolah($no) {global $conn;
-$pendidikan = mysqli_fetch_row($conn->query("SELECT * FROM pddkn_master WHERE no='$no'"));
+$pendidikan = $conn->query("SELECT * FROM pddkn_master WHERE no='$no'")->fetch_row();
+if (isset($pendidikan[1])){
 return $pendidikan[1];
+}else{return ("Lain-lain");}
 }
 
+function cacat($no) {global $conn;
+$cacat = $conn->query("SELECT * FROM cct_master WHERE no='$no'")->fetch_row();
+if (isset($cacat[1])){
+return uckata($cacat[1]);
+}else{return ("Lain-lain");}
+}
+function died($message){global $jsawal, $ident; 
+echo $message;
+include('footer.php');
+die($message);
+}
 function usia($tanggal_lahir){
 $birthDate = new DateTime($tanggal_lahir);
 $today = new DateTime("today");
@@ -73,26 +122,47 @@ case 11:$rNumber='B'; break;
 case 12:$rNumber='C'; break;
 case 13:$rNumber='D'; break;
 case 14:$rNumber='E'; break;
-case 15:$rNumber='F'; break; } 
+case 15:$rNumber='F'; break; }
 $rcolor .= $rNumber;
 } return $rcolor; }
 
 function data($rw,$rt,$jenis) {
 global $conn;
-if ($jenis !== '0'){
-$jeniss = "AND biodata_wni.jenis_klmin='$jenis'";
-}else {$jeniss = "";}
-if ($rt !== '0'){
-$rts = "AND data_keluarga.no_rt='$rt'";
-}else {$rts = "";}
-if ($rw !== '0'){
-$rws = "AND data_keluarga.no_rw='$rw'";
-}else {$rws = "";}
+//$k pekerjaan //$a agama //$s pendidikan akhir //$r status perRABIan
+if ($jenis !== '0'){$jeniss = "AND biodata_wni.jenis_klmin='$jenis'";}else {$jeniss = "";}
+if ($rt !== '0'){$rts = "AND data_keluarga.no_rt='$rt'";}else {$rts = "";}
+if ($rw !== '0'){$rws = "AND data_keluarga.no_rw='$rw'";}else {$rws = "";}
+
+if (!empty($_GET['k'])){
+$kerja = "AND biodata_wni.jenis_pkrjn='$_GET[k]'";
+$kerjas = ", biodata_wni.jenis_pkrjn ASC";
+}if (empty($_GET['k'])){$kerja = ""; $kerjas = ""; }
+
+if (!empty($_GET['a'])){
+$aga = "AND biodata_wni.agama='$_GET[a]'";
+$agam = ", biodata_wni.agama ASC";
+}if (empty($_GET['a'])){$aga = ""; $agam = ""; }
+
+if (!empty($_GET['s'])){
+$skol = "AND biodata_wni.pddk_akh='$_GET[s]'";
+}if (empty($_GET['s'])){$skol = ""; }
+
+if (!empty($_GET['r'])){
+$rabi = "AND biodata_wni.stat_kwn='$_GET[r]'";
+}if (empty($_GET['r'])){$rabi = "";}
+
+if (!empty($_GET['c'])){
+$cacat = "AND biodata_wni.pnydng_cct='$_GET[c]'";
+}if (empty($_GET['c'])){$cacat = "";}
+
+if ( (!empty($_GET['u'])) && (is_numeric($_GET['u'])) ){
+$umur = "AND (YEAR(CURDATE())-YEAR(biodata_wni.tgl_lhr)) < $_GET[u]";
+} if ((empty($_GET['u'])) || (!is_numeric($_GET['u']))) {died('You did something wrong');}
 
 $rwrt = $conn->query("SELECT *
 FROM biodata_wni
 JOIN data_keluarga ON data_keluarga.no_kk = biodata_wni.no_kk
-WHERE biodata_wni.flag_status='0' $rws $rts $jeniss
+WHERE biodata_wni.flag_status='0' $rws $rts $jeniss $kerja $aga $skol $rabi $umur $cacat
 ORDER BY data_keluarga.no_rw ASC, data_keluarga.no_rt ASC
 ;");
 //echo '<small>RW '.$rw. ' - RT ' .$rt. ' - Jenis ' .$jenis.'</small><br>';
@@ -119,7 +189,7 @@ while($row = $bacakk->fetch_assoc()) {
 $nama = strtolower($row["nama_lgkp"]);
 echo 
 "<tr><td>".
-$no++. ".</td><td><a class='text-dark' href='./index.php?p=pkk&nos=".base64_encode($row['no_kk'])."'>" . $row["no_kk"]. "</a></td><td>" . ucwords($nama)."</td><td>00" . $row["no_rt"]. "</td><td>00" . $row["no_rw"].
+$no++. ".</td><td><a class='text-dark' href='./?no=".base64_encode($row['no_kk'])."'>" . $row["no_kk"]. "</a></td><td>" . ucwords($nama)."</td><td>00" . $row["no_rt"]. "</td><td>00" . $row["no_rw"].
 "</td></tr>";
 }
 echo "</table>";
@@ -142,7 +212,7 @@ $mrayunwadon = mysqli_num_rows(data("1","0","2"))+mysqli_num_rows(data("2","0","
 echo '
 Laki - Laki : <b>'.$mrayunlaki.'</b><br>
 Perempuan : <b>'.$mrayunwadon.'</b><br>
-Jumlah Penduduk<br><h3><a href="index.php?p=data&rw=1&rw2=2" class="text-dark">'.$mrayunwadon+$mrayunlaki.'</a></h3>
+Jumlah Penduduk<br><h3><a href="?p=data&rw=1&rw2=2" class="text-dark">'.$mrayunwadon+$mrayunlaki.'</a></h3>
 ';
 echo '</div>';
 echo '</div>';
@@ -157,7 +227,7 @@ $termaswadon = mysqli_num_rows(data("3","0","2"));
 echo '
 Laki - Laki : <b>'.$termaslaki.'</b><br>
 Perempuan : <b>'.$termaswadon.'</b><br>
-Jumlah Penduduk<br><h3><a href="index.php?p=data&rw=3" class="text-dark">'.$termaslaki+$termaswadon.'</a></h3>
+Jumlah Penduduk<br><h3><a href="./?p=data&rw=3" class="text-dark">'.$termaslaki+$termaswadon.'</a></h3>
 ';
 echo '</div>';
 echo '</div>';
@@ -172,7 +242,7 @@ $getaswadon = mysqli_num_rows(data("4","0","2"))+mysqli_num_rows(data("5","0","2
 echo '
 Laki - Laki : <b>'.$getaslaki.'</b><br>
 Perempuan : <b>'.$getaswadon.'</b><br>
-Jumlah Penduduk<h3><a href="index.php?p=data&rw=4&rw2=5" class="text-dark">'.$getaslaki+$getaswadon.'</a></h3>
+Jumlah Penduduk<h3><a href="./?p=data&rw=4&rw2=5" class="text-dark">'.$getaslaki+$getaswadon.'</a></h3>
 ';
 echo '</div>';
 echo '</div>';
@@ -194,9 +264,9 @@ echo '<div class="col">
               </div>
               <div class="card-body text-center" >
 <p>
-Laki-Laki <a href="./index.php?p=data&rw='.$rwes.'&jns=1" class="text-danger">'.mysqli_num_rows(data($rwes,"0","1")).'</a>
-<br>Prempuan <a href="./index.php?p=data&rw='.$rwes.'&jns=2" class="text-danger">'.mysqli_num_rows(data($rwes,"0","2")).'
-</a><br><h3><a href="./index.php?p=data&rw='.$rwes.'" class="text-dark">'.mysqli_num_rows(data($rwes,"0","0")).'</a></h3>
+Laki-Laki <a href="./?p=data&rw='.$rwes.'&jns=1" class="text-danger">'.mysqli_num_rows(data($rwes,"0","1")).'</a>
+<br>Prempuan <a href="./?p=data&rw='.$rwes.'&jns=2" class="text-danger">'.mysqli_num_rows(data($rwes,"0","2")).'
+</a><br><h3><a href="./?p=data&rw='.$rwes.'" class="text-dark">'.mysqli_num_rows(data($rwes,"0","0")).'</a></h3>
 </p>';
 echo '              </div>
 </div>
@@ -220,9 +290,9 @@ RT 00'.$rt.' / RW 00'.$rw.' '.$dusun.'
               </div>
               <div class="card-body text-center" >
 <p>
-Laki-Laki <a href="./index.php?p=data&rw='.$rw.'&rt='.$rt.'&jns=1" class="text-dark">'.$laki.'</a><br>Prempuan <a href="./index.php?p=data&rw='.$rw.'&rt='.$rt.'&jns=2" class="text-dark">'.$wadon.'</a>
+Laki-Laki <a href="./?p=data&rw='.$rw.'&rt='.$rt.'&jns=1" class="text-dark">'.$laki.'</a><br>Prempuan <a href="./?p=data&rw='.$rw.'&rt='.$rt.'&jns=2" class="text-dark">'.$wadon.'</a>
 </p>
-<h3><a href="./index.php?p=data&rw='.$rw.'&rt='.$rt.'" class="text-dark">'.$laki+$wadon.'</a></h3>
+<h3><a href="./?p=data&rw='.$rw.'&rt='.$rt.'" class="text-dark">'.$laki+$wadon.'</a></h3>
               </div>
 </div>
 </div>';
@@ -245,7 +315,7 @@ JOIN data_keluarga ON data_keluarga.no_kk = biodata_wni.no_kk
 WHERE flag_status='0' AND YEAR(tgl_lhr) > $empat ORDER BY no_rw, no_rt asc
 ;");
 
-$jumlahbalita = mysqli_num_rows($ba4tahun);
+$jumlahbalita = $ba4tahun->num_rows;
 
 ?>
 
@@ -258,7 +328,7 @@ $jumlahbalita = mysqli_num_rows($ba4tahun);
       <th scope="col" width=""  class="text-center">Nama</th>
       <th scope="col" width="5" class="text-center">L/K</th>
       <th scope="col" width="90" class="text-center">Lahir</th>
-      <th scope="col" width="80" class="text-center">Usia</th>
+      <th scope="col" width="190" class="text-center">Usia</th>
       <th scope="col" width="175" class="text-center">Nama Ayah</th>
       <th scope="col" width="200" class="text-center">Nama Ibu</th>
       <th scope="col" width="" class="text-center">Alamat</th>
@@ -363,7 +433,10 @@ echo "</table>";
 
 function angka(){
 global $no, $conn, $jeniskelamin;
+
 echo '<div class="row row-cols-1 row-cols-sm-0 row-cols-md-2 g-4">';
+
+///////////Umur
 echo '<div class="col">';
 $berdasar = "
 SELECT
@@ -410,6 +483,8 @@ $no++;
 
 echo "</table>";
 echo '</div>';
+
+////// Jenis Kelamin
 echo '<div class="col">';
 echo '<table class="table table-sm table-hover">
   <thead class="bg-primary">
@@ -456,8 +531,8 @@ $agama = strtolower($row['descrip']);
 
 echo "<tr>";
 echo "<td>" . $nob++ . "</td>";
-echo "<td>" . ucwords($agama) . "</td>";
-echo "<td class=\"text-center\">" . $row['COUNT(*)'] . "</td>";
+echo "<td><a class='text-black' href=./?p=data&a=".$row['agama'].">" . ucwords($agama) . "</a></td>";
+echo "<td class=\"text-center\">". $row['COUNT(*)'] . "</td>";
 echo "</tr>"; 
 }
 echo '<tr class="table-dark">';
@@ -468,8 +543,7 @@ echo '</tr>';
 echo "</table>";
 echo '</div>';
 
-
-
+////////// Berdasar Pekerjaan
 echo '<div class="col">';
 echo '<table class="table table-sm table-hover">
   <thead class="bg-primary">
@@ -479,12 +553,8 @@ echo '<table class="table table-sm table-hover">
       <th scope="col" width="" class="text-center">Jumlah Jiwa</th>
     </tr>
   </thead>';
-$pekerjaan = $conn->query('SELECT no, descrip FROM pkrjn_master');
-while($row = mysqli_fetch_assoc($pekerjaan)){
-//    print_r($row);
- }
 $nop = "1";
-foreach($conn->query('SELECT descrip, jenis_pkrjn,COUNT(*)
+foreach($conn->query('SELECT no,descrip, jenis_pkrjn,COUNT(*)
 FROM biodata_wni
 JOIN pkrjn_master ON pkrjn_master.no = biodata_wni.jenis_pkrjn
 WHERE biodata_wni.flag_status="0"
@@ -493,7 +563,7 @@ $kerja = strtolower($row['descrip']);
 
 echo "<tr>";
 echo "<td>" . $nop++ . ".</td>";
-echo "<td>" . ucwords($kerja) . "</td>";
+echo "<td><a class='text-black' href=./?p=data&k=".$row['no'].">" .  ucwords($kerja) . "</a></td>";
 echo "<td class=\"text-center\">" . $row['COUNT(*)'] . "</td>";
 echo "</tr>"; 
 }
@@ -504,6 +574,8 @@ echo "<td colspan=\"2\" class=\"text-end\">Total
 echo '</tr>';
 echo "</table>";
 echo '</div>';
+
+////////// Pendidikan
 echo '<div class="col">';
 
 echo '<table class="table table-sm table-hover">
@@ -515,7 +587,7 @@ echo '<table class="table table-sm table-hover">
     </tr>
   </thead>';
 $nod = "1";  
-foreach($conn->query('SELECT descrip, pddk_akh,COUNT(*)
+foreach($conn->query('SELECT no,descrip, pddk_akh,COUNT(*)
 FROM biodata_wni
 JOIN pddkn_master ON pddkn_master.no = biodata_wni.pddk_akh
 WHERE biodata_wni.flag_status="0"
@@ -524,7 +596,7 @@ $pendidikan = $row['descrip'];
 
 echo "<tr>";
 echo "<td>" . $nod++ . "</td>";
-echo "<td>" . $pendidikan . "</td>";
+echo "<td><a class='text-black' href=./?p=data&s=".$row['no'].">" .  $pendidikan . "</a></td>";
 echo "<td class=\"text-center\">" . $row['COUNT(*)'] . "</td>";
 echo "</tr>"; 
 }
@@ -534,7 +606,7 @@ echo "<td colspan=\"2\" class=\"text-end\">Total
 "</b></td>";
 echo '</tr>';
 echo "</table>";
-
+////////// Pernikahan
 echo '<table class="table table-sm table-hover">
   <thead class="bg-primary">
     <tr>
@@ -543,12 +615,8 @@ echo '<table class="table table-sm table-hover">
       <th scope="col" width="" class="text-center">Jumlah Jiwa</th>
     </tr>
   </thead>';
-$pekerjaan = $conn->query('SELECT no, descrip FROM pkrjn_master');
-while($row = mysqli_fetch_assoc($pekerjaan)){
-//    print_r($row);
- }
 $nop = "1";
-foreach($conn->query('SELECT descrip, stat_kwn,COUNT(*)
+foreach($conn->query('SELECT no, descrip, stat_kwn,COUNT(*)
 FROM biodata_wni
 JOIN kwn_master ON kwn_master.no = biodata_wni.stat_kwn
 WHERE biodata_wni.flag_status="0"
@@ -557,7 +625,7 @@ $kawin = strtolower($row['descrip']);
 
 echo "<tr>";
 echo "<td>" . $nop++ . ".</td>";
-echo "<td>" . ucwords($kawin) . "</td>";
+echo "<td><a class='text-black' href=./?p=data&r=".$row['no'].">" . ucwords($kawin) . "</a></td>";
 echo "<td class=\"text-center\">" . $row['COUNT(*)'] . "</td>";
 echo "</tr>"; 
 }
@@ -575,21 +643,17 @@ echo '<table class="table table-sm table-hover">
       <th scope="col" width="" class="text-center">Jumlah Jiwa</th>
     </tr>
   </thead>';
-$pekerjaan = $conn->query('SELECT no, descrip FROM pkrjn_master');
-while($row = mysqli_fetch_assoc($pekerjaan)){
-//    print_r($row);
- }
 $nop = "1";
-foreach($conn->query('SELECT descrip, pnydng_cct,COUNT(*)
+foreach($conn->query('SELECT no, descrip, pnydng_cct,COUNT(*)
 FROM biodata_wni
 JOIN cct_master ON cct_master.no = biodata_wni.pnydng_cct
 WHERE biodata_wni.flag_status="0"
 GROUP BY pnydng_cct ORDER BY COUNT(*) desc') as $row) {
-$kawin = strtolower($row['descrip']);
+$cacat = strtolower($row['descrip']);
 
 echo "<tr>";
 echo "<td>" . $nop++ . ".</td>";
-echo "<td>" . ucwords($kawin) . "</td>";
+echo "<td><a class='text-black' href=./?p=data&c=".$row['no'].">" .  ucwords($cacat) . "</a></td>";
 echo "<td class=\"text-center\">" . $row['COUNT(*)'] . "</td>";
 echo "</tr>"; 
 }
@@ -606,36 +670,22 @@ echo '</div>'; //rowwwwwww
 
 } //funct angka
 
-function perangkat() {
-global $perangkat, $no;
-
-echo '<table class="table table-sm table-striped table-hover">';
-
-while($row = $perangkat->fetch_assoc()) {
-$nama = strtolower($row["nama_lgkp"]);
-$nokks = base64_encode($row['no_kk']);
-echo 
-"<tr>
-<td>".$no++. ".</td>
-<td>" . $row["nik"]. "</td>
-<td><a class='text-dark' href='./index.php?p=pkk&nos=".base64_encode($row['no_kk'])."'>" . uckata($nama)."</a></td>
-<td>".uckata($row['tmpt_lhr']).", " .bulan($row['tgl_lhr'])."</td>
-<td>" . usia($row['tgl_lhr'])."</td>
-<td>" . uckata($row["alamat"])." RT 00" . $row["no_rt"]. " RW 00" . $row["no_rw"]."</td>
-</tr>";
-}
-echo "</table>";
-
-} //penduduk
-
-
 function warga(){
 global $jeniskelamin, $ident, $no;
-if (!empty($_GET['rt'])){ $rt = trim($_GET['rt']); $erte = " RT 00".$rt; }
-if (empty($_GET['rt'])){ $rt = "0"; $erte = ""; }
-if (!empty($_GET['jns'])){ $jns = $_GET['jns']; $jnis = $jeniskelamin[$jns]; }
-if (empty($_GET['jns'])){ $jns = "0"; $jnis = ""; }
+//s = sekolah; a = agama; k = pekerjaan
+ob_start(); ///////generate html dengan ob
+
+if (!empty($_GET['rt'])){ $rt = trim($_GET['rt']); $erte = " RT 00".$rt; } if (empty($_GET['rt'])){ $rt = "0"; $erte = ""; }
 if (empty($_GET['rw2'])){$erwe2 = ""; $jumlahpddk2 ="0";$rw2="";}
+if (!empty($_GET['jns'])){ $jns = $_GET['jns']; $jnis = "Jenis Kelamin ".$jeniskelamin[$jns]; }
+if (empty($_GET['jns'])){ $jns = "0"; $jnis = ""; }
+if (!empty($_GET['a'])){ $aga = $_GET['a']; $agam = "Agama ".agama($aga); } if (empty($_GET['a'])){ $agam = ""; }
+if (!empty($_GET['s'])){ $seklah = $_GET['s']; $sekolah = "Pendidikan : ".sekolah($seklah); } if (empty($_GET['s'])){ $sekolah = ""; }
+if (!empty($_GET['r'])){ $rabi = $_GET['r']; $rabis = "Status Pernikahan : ".status($rabi); } if (empty($_GET['r'])){ $rabis = ""; }
+if (!empty($_GET['k'])){ $kerj = $_GET['k']; $kerja = "Perkerjaan : ".pekerjaan($kerj); } if (empty($_GET['k'])){ $kerja = ""; }
+if (!empty($_GET['c'])){ $caca = $_GET['c']; $cacat = "Penyandang Cacat : ".cacat($caca); } if (empty($_GET['c'])){ $cacat = ""; }
+if (!empty($_GET['u'])){ $usia = " Usia Di Bawah ".$_GET['u']." Tahun"; } if (empty($_GET['u'])){ $usia = ""; }
+
 if (empty($_GET['rw']) && empty($_GET['jns']) && empty($_GET['rt'])){
 $rw = "0";
 $erwe = "";
@@ -658,23 +708,22 @@ if (($rw == "1") || ($rw == "2")  || ($rw2 == "1")  || ($rw2 == "2")) {$nadus = 
 if (($rw == "3") || ($rw2 == "3")) {$nadus = "Dusun Termas";}
 if (($rw == "4") || ($rw == "5") || ($rw2 == "4") || ($rw2 == "5")) {$nadus = "Dusun Getas";}
 
-echo '<div class="mx-auto text-center text-dark border border-dark my-2 mb-4 py-1 p-2 border-2" style="width:50%">
-<h5><b>Data Warga <br> Desa '.uckata($ident['nama_kel']).' '.$nadus.$erte.$erwe.$erwe2.'</h5>Jenis Kelamin '.$jnis.'</b><br>Jumlah Warga '.$jumlahpddk+$jumlahpddk2.' </div>';
-echo '<table class="table table-sm table-hover">';
+echo '<div class="mx-auto text-center text-dark border border-dark my-2 mb-4 py-1 p-2 border-2" style="width:50%; padding: -15px 0 15px 0;">
+<h5><b>Data Warga <br> Desa '.uckata($ident['nama_kel']).' '.$nadus.$erte.$erwe.$erwe2.'</h5>'.$jnis.$agam.$kerja.$sekolah.$rabis.$cacat.$usia.'</b><br>Jumlah Warga '.$jumlahpddk+$jumlahpddk2.' </div>';
+echo '<table class="table table-sm table-hover"><tbody>';
 foreach($data as $row) :
 $nama = $row["nama_lgkp"];
 $dsna = array("Dusn ", "DUSUN ", "Dsn ");
-$alamat = $row["alamat"];
-$alamat = str_replace($dsna, "", $alamat);
+$alamat = str_replace($dsna, "", $row['alamat']);
 echo 
-"<tr>
-<td>".$no++. ".</td>
-<td>" . $row["nik"]. "</td>
-<td><a class='text-dark' href='./index.php?p=pkk&nos=".base64_encode($row['no_kk'])."'>" . uckata($nama)."</a></td>
-<td>".uckata($row['tmpt_lhr']).", " .bulan($row['tgl_lhr'])."</td>
-<td>" . usia($row['tgl_lhr'])."</td>
-<td>" . uckata($alamat)." RT 00" . $row["no_rt"]. " RW 00" . $row["no_rw"]."</td>
-</tr>";
+'<tr>
+<td>'.$no++. '.</td>
+<td>' . $row['nik']. '</td>
+<td><a class="text-dark" href="./?no='.base64_encode($row['no_kk']).'">' . uckata($nama).'</a></td>
+<td>'.uckata($row['tmpt_lhr']).', ' .bulan($row['tgl_lhr']).'</td>
+<td>' . usia($row['tgl_lhr']).'</td>
+<td>' . uckata($alamat).' RT 00' . $row['no_rt']. ' RW 00' . $row['no_rw'].'</td>
+</tr>';
 endforeach;
 
 if (!empty($_GET['rw2'])){
@@ -686,39 +735,47 @@ $dsna = array("Dusn ", "DUSUN ", "Dsn ");
 $alamat = $row["alamat"];
 $alamat = str_replace($dsna, "", $alamat);
 echo 
-"<tr>
-<td>".$no++. ".</td>
-<td>" . $row["nik"]. "</td>
-<td><a class='text-dark' href='./index.php?p=pkk&nos=".base64_encode($row['no_kk'])."'>" . uckata($nama)."</a></td>
-<td>".uckata($row['tmpt_lhr']).", " .bulan($row['tgl_lhr'])."</td>
-<td>" . usia($row['tgl_lhr'])."</td>
-<td>" . uckata($alamat)." RT 00" . $row["no_rt"]. " RW 00" . $row["no_rw"]."</td>
-</tr>";
+'<tr>
+<td>'.$no++. '.</td>
+<td>' . $row['nik']. '</td>
+<td><a class="text-dark" href="./?no='.base64_encode($row['no_kk']).'">' . uckata($nama).'</a></td>
+<td>'.uckata($row['tmpt_lhr']).', ' .bulan($row['tgl_lhr']).'</td>
+<td>' . usia($row['tgl_lhr']).'</td>
+<td>' . uckata($alamat).' RT 00' . $row['no_rt']. ' RW 00' . $row['no_rw'].'</td>
+</tr>';
 endforeach;
 }
-echo "</table>";
+echo "</tbody></table>";
+$html = ob_get_contents();
+ob_end_clean();
 
+echo "<form action='print.php' method='post'>";
+echo "<input type='hidden' name='nokk' value='$nadus.$erte.$erwe.$erwe2.$jnis.$agam.$kerja'>";
+echo '<textarea style="display:none;" name="data">'.$html.'</textarea>';
+echo '<button class="btn float-end bi bi-printer w-2 p-2 text-success" type="submit" name="print"></button>';
+echo "</form>";
+
+echo $html;
 }
 
 function perkk() {
 global $conn, $no, $jeniskel;
-if (!empty($_GET['nos'])) {
-$nokk = base64_decode($_GET['nos']);
-
+if (empty($_GET['no'])) {$nokk = '';$html='';}
+ob_start(); ///////generate html dengan ob
+if (!empty($_GET['no'])) {
+$nokk = base64_decode($_GET['no']);
 $datakk = "SELECT *,timestampdiff(year, tgl_lhr, curdate()) as umur FROM biodata_wni
 JOIN shdk ON shdk.no = biodata_wni.stat_hbkel
-WHERE biodata_wni.no_kk LIKE '%$nokk%' ORDER BY biodata_wni.stat_hbkel ASC,biodata_wni.tgl_lhr ASC
+WHERE biodata_wni.no_kk LIKE '%$nokk%' ORDER BY biodata_wni.stat_hbkel ASC, biodata_wni.tgl_lhr ASC
 ;";
 $datakk = $conn->query($datakk);
 echo '
-<span class="float-end bi bi-printer w-2 p-2 text-success"></span>
-
-<div class="mx-auto text-center text-dark border border-dark my-2 py-1 pt-2 border-2" style="width:40%"><h5><b>'.$nokk.'</b></h5></div>
+<div class="mx-auto text-center text-dark border border-dark my-2 py-1 pt-2" style="width:40%"><h5><b>'.$nokk.'</b></h5></div>
 
 <table class="table table-sm table-striped">
 <thead>
 <tr>
-<td width="10" class="text-center">No</td>
+<td width="5" class="text-center">No</td>
 <td class="text-center">NIK</td>
 <td class="text-center">Nama Lengkap</td>
 <td class="text-center">L/P</td>
@@ -760,6 +817,17 @@ echo '<tr>
 endwhile;
 echo '</tbody></table>
 ';
+$html = ob_get_contents();
+ob_end_clean();
+
+echo '<form action="print.php" method="post">';
+echo "<input type='hidden' name='nokk' value='$nokk'>";
+echo "<input type='hidden' name='data' value='$html'>";
+echo '<button class="btn float-end bi bi-printer w-2 p-2 text-success" type="submit" name="print"></button>';
+echo '</form>';
+
 }
+
+echo $html;
 } //function perkk
 ?>
