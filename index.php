@@ -1,63 +1,27 @@
 <?php
+define('web',true);
 include("./head.php");
-?>
-<section class="mx-auto pt-3">
-
-<?php
-if(isset($_GET['p'])){
+if(isset($_GET['no'])){
+perkk();
+}elseif(isset($_GET['p'])){
 $page = $_GET['p'];
-$no = 1;
 
 switch ($page) {
+case 'pkk': echo perkk(); break;			
+case 'data': echo warga(); break;
+case 'kk': echo kepalakk(); break;
+case 'angka': echo angka(); break;
+case 'dusun': echo dusun(); break;			
+case 'balita': echo ba4ta(); break;
+case 'lansia': echo lansia(); break;
+case 'chart': include "chart.php"; break;			
+case 'perangkat': echo perangkat(); break;
+case 'pdf': include "dopdf.php"; echo pdf(); break;			
 
-
-case 'kk':
-echo kepalakk();
+default: echo "<center><h3>Halaman tidak di temukan !</h3></center>";
 break;
-
-case 'angka':
-echo angka();
-break;			
-
-case 'dusun':
-echo dusun();
-break;			
-
-case 'chart':
-include "chart.php";
-//echo chart();
-break;			
-
-case 'pdf':
-include "dopdf.php";
-echo pdf();
-break;			
-
-case 'balita':
-echo ba4ta();
-break;
-
-case 'lansia':
-echo lansia();
-break;
-
-case 'perangkat':
-echo perangkat();
-break;
-
-case 'data':
-echo warga();
-break;
-
-case 'pkk':
-echo perkk();
-break;			
-
-default:
-echo "<center><h3>Halaman tidak di temukan !</h3></center>";
-break;
-		}
-}else{
+	}
+	}else{
 
 $arraykolom = array('nama' =>  'nama_lgkp','nik' =>  'nik','nokk' =>  'no_kk','ibu' =>  'nama_lgkp_ibu');
 $arrayk = array('nama' =>  'Nama', 'nik' =>  'No NIK', 'nokk' =>  'No KK', 'ibu' =>  'Nama Ibu');
@@ -113,7 +77,6 @@ if ($no % 2 == 0){
 }else {
     $warn = "";
 }
-
 echo "<div class='col'>";
 echo '<table class="table table-sm table-hover '.$warn.'" style="width:100%"><tr>';
 $tl = bulan($row['tgl_lhr']);
@@ -128,10 +91,19 @@ echo "<td width='60'>NIK </td><td>:</td><td><a data-bs-toggle='modal' href='#Y2"
 "</a></td></tr><tr><td>Nama </td><td>:</td><td>". uckata($row["nama_lgkp"]) ,
 "</td></tr><tr><td>Lahir </td><td>:</td><td>". uckata($row['tmpt_lhr']). ", ".$tl.
 "</td></tr><tr><td>Usia </td><td>:</td><td class='d-flex'>". usia($row['tgl_lhr']) ,
-"</td></tr><tr><td>Status </td><td>:</td><td><span class='float-left'>". $status[$row['stat_kwn']],
+"</td></tr><tr><td>Status </td><td>:</td><td><span class='float-left'>". status($row['stat_kwn']),
 "</span><span class='float-right' style='float:right;'>".$row["flag_status"]."</span></td></tr><tr><td>Alamat </td><td>:</td><td>". uckata($row['alamat']). " 00".$row['no_rt']. " / 00" .$row['no_rw'],
+"</td></tr>";
+if ($kolom == "ibu"){
+echo "<tr><td>Ibu</td><td>:</td><td>". uckata($row["nama_lgkp_ibu"]),
 "</td>"
    ;
+}
+if ($kolom == "nokk"){
+echo "<tr><td>No KK</td><td>:</td><td>". $row["no_kk"],
+"</td>"
+   ;
+}
 echo "</tr></table>";
 echo "</div>";
 $no++;
@@ -161,7 +133,7 @@ echo '
 </tr></thead>';
 $datakk = "SELECT *,timestampdiff(year, tgl_lhr, curdate()) as umur FROM biodata_wni
 JOIN shdk ON shdk.no = biodata_wni.stat_hbkel
-WHERE biodata_wni.no_kk LIKE '%$nokk%' ORDER BY biodata_wni.stat_hbkel ASC,biodata_wni.tgl_lhr ASC
+WHERE biodata_wni.no_kk LIKE '%$nokk%' ORDER BY umur DESC, biodata_wni.stat_hbkel ASC
 ;";
 $datakk = $conn->query($datakk);
     
@@ -183,8 +155,8 @@ echo '<tr>
 <td align="center">'.$jeniskel[$r['jenis_klmin']].' </td>
 <td> '.date("d/m/Y",strtotime($r['tgl_lhr'])).' </td>
 <td align="center">'.$r['umur'].' </td>
-<td>'.uckata(pekerjaan($r['jenis_pkrjn'])).' </td>
-<td>'.$status[$r['stat_kwn']].' </td>
+<td>'.pekerjaan($r['jenis_pkrjn']).' </td>
+<td>'.status($r['stat_kwn']).' </td>
 <td>'.uckata($descrip).' </td>
 <td>'.uckata($ayah).' </td>
 <td>'.uckata($ibu).' </td>
@@ -217,9 +189,7 @@ echo '
 </form>
 </div>';
 }
-
-
-}
+	}
 ?>
 
 </section>

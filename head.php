@@ -24,10 +24,7 @@ echo $cssawal;
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="./index.php">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./cari.php">Cari Data</a>
+            <a class="active" aria-current="page" href="./"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b7/LOGO_KABUPATEN_GROBOGAN.png" width="30px"></a>
           </li>
         </ul>
 <form action="./index.php" method="post"  class="d-flex">
@@ -56,7 +53,7 @@ echo $cssawal;
 Jumlah Penduduk
               </div>
               <div class="card-body text-center" >
-                <h3> <?php echo mysqli_num_rows(data('0','0','0'));?>   </h3>
+                <h3> <?php echo mysqli_num_rows($conn->query("SELECT * FROM biodata_wni WHERE flag_status='0'"));?>   </h3>
                 
               <a href="?p=data" class="small-box"> Detail </a>
               </div>
@@ -84,7 +81,7 @@ Perangkat Desa
               </div>
               <div class="card-body text-center">
                 <h3><?php echo $jumperangkat;?></h3>
-              <a href="index.php?p=perangkat" class="small-box">Detail</a>
+              <a href="./?p=data&k=85" class="small-box">Detail</a>
               </div>
             </div>
           </div>          <!-- ./col -->
@@ -134,15 +131,5 @@ DUSUN / RT / RW
           </div>          <!-- ./col -->
         
   </div>
-        <div class="mx-auto" style="width: ;">Data Diupdate Hari 
-        <?php
-//        print_r($row);
-        $r = explode(" ", $ident['last_kons']);
-        $h = date('w', strtotime($r[0]));
-        echo $hari[$h]. ", ";
-
-        echo bulan($r[0]). " Pukul ".$r[1];?>
-        </div>  
-  
   </section>
         
