@@ -176,7 +176,7 @@ echo '</div>';
 }
 else{
 echo '
-<div class="mx-auto text-center mb-3 pb-3 pt-3" style="width:50%">
+<div class="mx-auto text-center mb-3 pb-3" style="width:50%">
 <form action="./index.php" method="post"  class="d-flex">
               <select class="" name="Kolom" required="" style="width:80px;">
                 <option value="nama">Nama</option>

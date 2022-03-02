@@ -43,8 +43,8 @@ echo $cssawal;
 </header>
 
 <main class="flex-shrink-0">
-<div class="container pt-3">
-  <section class="pt-5 text-center" >
+<div class="container py-3">
+  <section class="pt-5 pb-3 text-center" >
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-6 g-4">
           <div class="col">
             <!-- small box -->
