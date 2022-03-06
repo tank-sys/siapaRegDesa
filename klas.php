@@ -157,7 +157,7 @@ $cacat = "AND biodata_wni.pnydng_cct='$_GET[c]'";
 
 if ( (!empty($_GET['u'])) && (is_numeric($_GET['u'])) ){
 $umur = "AND (YEAR(CURDATE())-YEAR(biodata_wni.tgl_lhr)) < $_GET[u]";
-} if ((empty($_GET['u'])) || (!is_numeric($_GET['u']))) {died('You did something wrong');}
+} if (empty($_GET['u'])) {}
 
 $rwrt = $conn->query("SELECT *
 FROM biodata_wni
