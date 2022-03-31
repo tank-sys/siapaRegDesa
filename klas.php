@@ -1,7 +1,6 @@
 <?php
 defined('web') or die ("Gak intuk akses langsung");
 
-
 ///koneksi
 $servername = "localhost:6969";
 $username = "ta";
@@ -22,8 +21,8 @@ $hari = array (0 =>  'Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu
 $jeniskelamin = array (1 =>  'Laki-Laki', 'Perempuan');
 $jeniskel = array (1 =>  'L', 'P');
 $dusunku = array (1 =>  'Mrayun', 'Termas', 'Getas');
-$warna = array ('text-white bg-primary', 'text-white bg-secondary', 'text-white bg-success', 'text-white bg-danger', 'text-white bg-dark', 'text-dark bg-info','text-dark bg-light','text-white bg-dark'); 
 $dusun = array('Dusun Mrayun' => array('1', '2'), 'Dusun Termas' => array('3'), 'Dusun Getas' => array('4', '5'));
+$warna = array ('text-white bg-primary', 'text-white bg-secondary', 'text-white bg-success', 'text-white bg-danger', 'text-white bg-dark', 'text-dark bg-info','text-dark bg-light','text-white bg-dark'); 
 $akerja = array('1' => "-",
 '2' => "MENGURUS Rumah",
 '3' => "PELAJAR / Mahasiswa",
@@ -94,7 +93,7 @@ if (isset($cacat[1])){
 return uckata($cacat[1]);
 }else{return ("Lain-lain");}
 }
-function died($message){global $jsawal, $ident; 
+function died($message){global $jsawal, $ident, $hari; 
 echo $message;
 include('footer.php');
 die($message);
@@ -157,7 +156,7 @@ $cacat = "AND biodata_wni.pnydng_cct='$_GET[c]'";
 
 if ( (!empty($_GET['u'])) && (is_numeric($_GET['u'])) ){
 $umur = "AND (YEAR(CURDATE())-YEAR(biodata_wni.tgl_lhr)) < $_GET[u]";
-} if (empty($_GET['u'])) {}
+} if (empty($_GET['u'])) {$umur = "";}
 
 $rwrt = $conn->query("SELECT *
 FROM biodata_wni
@@ -165,14 +164,13 @@ JOIN data_keluarga ON data_keluarga.no_kk = biodata_wni.no_kk
 WHERE biodata_wni.flag_status='0' $rws $rts $jeniss $kerja $aga $skol $rabi $umur $cacat
 ORDER BY data_keluarga.no_rw ASC, data_keluarga.no_rt ASC
 ;");
-//echo '<small>RW '.$rw. ' - RT ' .$rt. ' - Jenis ' .$jenis.'</small><br>';
 return $rwrt;
 }
 
 // function khusus
 function kepalakk() { ///kepala keluarga
 global $bacakk, $no;
-?>
+echo '
 <table class="table table-sm table-hover">
   <thead>
     <tr>
@@ -183,8 +181,7 @@ global $bacakk, $no;
       <th scope="col" width="5" class="text-center">RW</th>
     </tr>
   </thead>
-<?php
-
+';
 while($row = $bacakk->fetch_assoc()) {
 $nama = strtolower($row["nama_lgkp"]);
 echo 
@@ -300,9 +297,6 @@ endwhile;
 // per RT END
 echo "</div>";
 }
-// Per RW dan RT END
-
-
 }
 
 function ba4ta() { ///Bawah usia empat tahun
@@ -317,9 +311,7 @@ WHERE flag_status='0' AND YEAR(tgl_lhr) > $empat ORDER BY no_rw, no_rt asc
 
 $jumlahbalita = $ba4tahun->num_rows;
 
-?>
-
-<div class="text-center">Jumlah Usia <?php echo $e -1;?> Tahun Ke Bawah = <?php echo $jumlahbalita;?>
+echo '<div class="text-center">Jumlah Usia <?php echo $e -1;?> Tahun Ke Bawah = <?php echo $jumlahbalita;?>
 </div>
 <table class="table table-sm table-hover">
   <thead>
@@ -333,8 +325,8 @@ $jumlahbalita = $ba4tahun->num_rows;
       <th scope="col" width="200" class="text-center">Nama Ibu</th>
       <th scope="col" width="" class="text-center">Alamat</th>
     </tr>
-  </thead>
-<?php
+  </thead>';
+
 while($ro = $ba4tahun->fetch_assoc()) {
 
 $laki = $ro["jenis_klmin"];
@@ -366,15 +358,11 @@ global $no, $conn;
 $tahun = Date('Y');
 $e = "65";
 $lan = $tahun - $e;
-$lansia = $conn->query("select * FROM biodata_wni
-JOIN data_keluarga ON data_keluarga.no_kk = biodata_wni.no_kk
-WHERE flag_status='0' AND YEAR(tgl_lhr) < $lan ORDER BY no_rw, no_rt, tgl_lhr asc
-;");
+$lansia = $conn->query("select * FROM biodata_wni JOIN data_keluarga ON data_keluarga.no_kk = biodata_wni.no_kk WHERE flag_status='0' AND YEAR(tgl_lhr) < $lan ORDER BY no_rw, no_rt, tgl_lhr asc ;");
 
 $jumlahlansia = mysqli_num_rows($lansia);
 
-?>
-
+echo '
 <div class="text-center">Jumlah Usia <?php echo $e;?> Tahun Ke Atas = <?php echo $jumlahlansia;?>
 </div>
 <table class="table table-sm table-hover">
@@ -389,8 +377,8 @@ $jumlahlansia = mysqli_num_rows($lansia);
       <th scope="col" width="200" class="text-center">Nama Ibu</th>
       <th scope="col" width="" class="text-center">Alamat</th>
     </tr>
-  </thead>
-<?php
+  </thead>';
+
 while($ro = $lansia->fetch_assoc()) {
 
 $laki = $ro["jenis_klmin"];
