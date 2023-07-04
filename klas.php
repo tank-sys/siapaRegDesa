@@ -3,8 +3,8 @@ defined('web') or die ("Gak intuk akses langsung");
 
 ///koneksi9C831B61416AB3B6AFA61E0812BF8C50868BE4DD	MySQL4.1+	masesolo
 #$servername = "localhost:3306";
-$servername = "localhost:6969";
-$username = "root";
+$servername = "localhost";
+$username = "toor";
 $password = "masesolo";
 #$dbname = "penduduk";
 $dbname = "smard";
