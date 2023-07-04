@@ -54,8 +54,12 @@ Jumlah Penduduk
               </div>
               <div class="card-body text-center" >
                 <h3> <?php echo mysqli_num_rows($conn->query("SELECT * FROM biodata_wni WHERE flag_status='0'"));?>   </h3>
-                
-              <a href="?p=data" class="small-box"> Detail </a>
+<small>
+<?php echo mysqli_num_rows($conn->query("SELECT * FROM biodata_wni WHERE flag_status='0' AND jenis_klmin='1'"));?> ( Lk ) 
+<?php echo mysqli_num_rows($conn->query("SELECT * FROM biodata_wni WHERE flag_status='0' AND jenis_klmin='2'"));?> ( Pr )
+</small>
+<a href="?p=data" class="float-right"> Detail </a>
+
               </div>
             </div>
           </div>
@@ -68,7 +72,11 @@ Jumlah KK
               </div>
               <div class="card-body text-center">
                 <h3><?php echo $jumlahKK;?></h3>
-              <a href="?p=kk" class="">Detail</a>
+<small>
+<?php echo mysqli_num_rows($conn->query("SELECT * FROM data_keluarga JOIN biodata_wni ON biodata_wni.no_kk = data_keluarga.no_kk WHERE biodata_wni.stat_hbkel='1' AND biodata_wni.flag_status='0' AND jenis_klmin='1'"));?> ( Lk ) 
+<?php echo mysqli_num_rows($conn->query("SELECT * FROM data_keluarga JOIN biodata_wni ON biodata_wni.no_kk = data_keluarga.no_kk WHERE biodata_wni.stat_hbkel='1' AND biodata_wni.flag_status='0' AND jenis_klmin='2'"));?> ( Pr )
+</small><br>
+<a href="?p=kk" class="">Detail</a>
               </div>
             </div>
           </div>

@@ -7,8 +7,9 @@ perkk();
 $page = $_GET['p'];
 
 switch ($page) {
-case 'pkk': echo perkk(); break;			
+case 'pkk': echo perkk(); break;
 case 'data': echo warga(); break;
+case 'datakk': echo wargakk(); break;
 case 'kk': echo kepalakk(); break;
 case 'angka': echo angka(); break;
 case 'dusun': echo dusun(); break;			
